@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 public class Distributor extends Server {
 
-    public IntMap<Redirector> redirectors;
+    public IntMap<Redirector> redirectors = new IntMap<>();
 
     public Distributor() {
         super(32768, 8192, new Serializer());
@@ -25,6 +25,8 @@ public class Distributor extends Server {
     }
 
     public void run(int port) throws IOException {
+        Log.info("Distributor hosted on port @", port);
+
         bind(port, port);
         run();
     }
@@ -34,16 +36,19 @@ public class Distributor extends Server {
         @Override
         public void connected(Connection connection) {
             Log.info("Connection @ received!", connection.getID());
-
-            if (redirectors.containsKey(connection.getID())) redirectors.put(connection.getID(), new Redirector(connection));
         }
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
             Log.info("Connection @ lost: @", connection.getID(), reason);
 
-            var redirector = redirectors.remove(connection.getID());
-            if (redirector != null) redirector.disconnected(connection, reason);
+            var redirector = redirectors.get(connection.getID());
+            if (redirector == null) return;
+
+            redirector.disconnected(connection, reason);
+
+            redirectors.remove(redirector.host.getID());
+            redirectors.remove(redirector.client.getID());
         }
 
         @Override

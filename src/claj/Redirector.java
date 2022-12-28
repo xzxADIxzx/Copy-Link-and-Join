@@ -12,23 +12,27 @@ import arc.util.Log;
  */
 public class Redirector implements NetListener {
 
+    public String link;
     public Connection host, client;
 
-    public Redirector(Connection host) {
+    public Redirector(String link, Connection host) {
+        this.link = link;
         this.host = host;
-        Log.info("Room @ created!", host.getID());
+
+        Log.info("Room @ created!", link);
     }
 
     @Override
     public void disconnected(Connection connection, DcReason reason) {
         host.close(DcReason.closed);
-        client.close(DcReason.closed);
+        if (client != null) client.close(DcReason.closed);
 
-        Log.info("Room @ closed!", host.getID());
+        Log.info("Room @ closed!", link);
     }
 
     @Override
     public void received(Connection connection, Object object) {
-        (connection == host ? client : host).sendTCP(object);
+        var receiver = connection == host ? client : host;
+        if (receiver != null) receiver.sendTCP(object);
     }
 }
