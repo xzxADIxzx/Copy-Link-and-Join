@@ -1,0 +1,34 @@
+apply plugin: "java"
+
+version '1.0'
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+sourceSets.main.java.srcDirs = ['src']
+
+repositories {
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+}
+
+ext {
+    mindustryVersion = 'v140.4'
+}
+
+dependencies {
+    implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    implementation "com.github.Anuken.Arc:arcnet:$mindustryVersion"
+    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+}
+
+jar {
+    archiveFileName = "${project.archivesBaseName}.jar"
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    manifest {
+        attributes('Main-Class': 'claj.Main')
+    }
+}

@@ -1,0 +1,12 @@
+.gradle/*
+.settings/*
+.vscode/*
+
+bin/*
+lib/*
+build/*
+
+*.classpath
+*.project
+*.bat
+*.xml
