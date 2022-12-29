@@ -6,7 +6,7 @@ Everything you need to connect is in my [Scheme Size](https://github.com/xzxADIx
 Just host the game and create a room in a special dialog next to the open server button, then copy the link and send it to your friend who can connect using it.
 
 ## How to host server
-Download the repository and compile on any version of Java using `./gradlew jar` command. Start the server with the command `java -jar Copy-Link-and-Join.jar *port*` and replace port with the one you need.
+Download the repository and compile on any version of Java using `./gradlew jar` command. Start the server with the command `java -jar Copy-Link-and-Join.jar port` and replace port with the one you need.
 
 ## Local definitions
 host - the player who hosted the game and created a room on the server.   
