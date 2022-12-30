@@ -64,7 +64,7 @@ public class Distributor extends Server {
 
         @Override
         public void disconnected(Connection connection, DcReason reason) {
-            Log.info("Connection @ lost: @", connection.getID(), reason);
+            Log.info("Connection @ lost: @.", connection.getID(), reason);
 
             var redirector = redirectors.get(connection.getID());
             if (redirector == null) return;
@@ -89,7 +89,8 @@ public class Distributor extends Server {
                     if (redirector == null) return;
 
                     redirector.client = connection;
-                    Log.info("Connection @ joined to room @", connection.getID(), redirector.link);
+                    redirectors.put(connection.getID(), redirector);
+                    Log.info("Connection @ joined to room @.", connection.getID(), redirector.link);
                 }
 
                 return;

@@ -27,7 +27,7 @@ public class Redirector implements NetListener {
         host.close(DcReason.closed);
         if (client != null) client.close(DcReason.closed);
 
-        Log.info("Room @ closed!", link);
+        Log.info("Room @ closed.", link);
     }
 
     @Override

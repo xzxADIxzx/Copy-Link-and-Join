@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 
 public class Serializer extends PacketSerializer {
 
-    public static final byte linkID = 112;
+    public static final byte linkID = -3;
 
     public ByteBuffer last = ByteBuffer.allocate(8192);
 
