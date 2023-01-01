@@ -19,7 +19,8 @@ public class Main {
         };
 
         try {
-            new Distributor().run(10000);
+            if (args.length == 0) throw new RuntimeException("Need a port as an argument!");
+            new Distributor().run(Integer.parseInt(args[0]));
         } catch (Throwable error) {
             Log.err("Could not to load redirect system", error);
         }
