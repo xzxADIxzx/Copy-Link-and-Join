@@ -48,7 +48,7 @@ public class Distributor extends Server {
 
     public Redirector find(String link) {
         for (Entry<Redirector> entry : redirectors)
-            if (entry.value.link.equals(link)) return entry.value;
+            if (entry.value.link.equals(link) && entry.value.client == null) return entry.value;
 
         return null;
     }
@@ -69,10 +69,11 @@ public class Distributor extends Server {
             var redirector = redirectors.get(connection.getID());
             if (redirector == null) return;
 
-            redirector.disconnected(connection, reason);
-
             redirectors.remove(redirector.host.getID());
             if (redirector.client != null) redirectors.remove(redirector.client.getID());
+
+            // called after deletion to prevent double close message
+            redirector.disconnected(connection, reason);
         }
 
         @Override
@@ -86,7 +87,10 @@ public class Distributor extends Server {
                     redirectors.put(connection.getID(), new Redirector(link, connection));
                 } else {
                     var redirector = find(link);
-                    if (redirector == null) return;
+                    if (redirector == null) {
+                        connection.close(DcReason.error);
+                        return;
+                    }
 
                     redirector.client = connection;
                     redirectors.put(connection.getID(), redirector);
