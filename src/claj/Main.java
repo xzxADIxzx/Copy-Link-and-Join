@@ -18,9 +18,12 @@ public class Main {
             System.out.println(result);
         };
 
+        var distributor = new Distributor();
+        new Control(distributor);
+
         try {
             if (args.length == 0) throw new RuntimeException("Need a port as an argument!");
-            new Distributor().run(Integer.parseInt(args[0]));
+            distributor.run(Integer.parseInt(args[0]));
         } catch (Throwable error) {
             Log.err("Could not to load redirect system", error);
         }
