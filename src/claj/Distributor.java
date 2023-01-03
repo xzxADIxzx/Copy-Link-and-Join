@@ -9,6 +9,7 @@ import arc.net.Server;
 import arc.struct.IntMap;
 import arc.struct.IntMap.Entry;
 import arc.util.Log;
+import arc.util.Ratekeeper;
 
 import java.io.IOException;
 
@@ -22,6 +23,9 @@ public class Distributor extends Server {
     /** List of all characters that are allowed in a link. */
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
+    /** Limit for packet count sent within 3 sec that will lead to a blacklist. */
+    public static final int spamLimit = 250;
+
     public IntMap<Redirector> redirectors = new IntMap<>();
 
     public Distributor() {
@@ -30,7 +34,8 @@ public class Distributor extends Server {
     }
 
     public void run(int port) throws IOException {
-        Log.info("Distributor hosted on port @", port);
+        Blacklist.load(); // refresh github's ips
+        Log.info("Distributor hosted on port @.", port);
 
         bind(port, port);
         run();
@@ -59,7 +64,13 @@ public class Distributor extends Server {
 
         @Override
         public void connected(Connection connection) {
+            if (Blacklist.contains(connection.getRemoteAddressTCP().getAddress().getHostAddress())) {
+                connection.close(DcReason.closed);
+                return;
+            }
+
             Log.info("Connection @ received!", connection.getID());
+            connection.setArbitraryData(new Ratekeeper());
         }
 
         @Override
@@ -78,6 +89,16 @@ public class Distributor extends Server {
 
         @Override
         public void received(Connection connection, Object object) {
+            var rate = (Ratekeeper) connection.getArbitraryData();
+            if (!rate.allow(3000L, spamLimit)) {
+                String ip = connection.getRemoteAddressTCP().getAddress().getHostAddress();
+                Log.warn("Blacklisting @ as potential DOS attack - packet spam.", ip);
+                Blacklist.add(ip);
+
+                connection.close(DcReason.closed);
+                return;
+            }
+
             if (object instanceof FrameworkMessage) return;
             if (object instanceof String link) {
                 if (link.equals("new")) {
