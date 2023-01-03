@@ -13,13 +13,12 @@ repositories {
 }
 
 ext {
-    mindustryVersion = 'v140.4'
+    arcVersion = 'v140.4'
 }
 
 dependencies {
-    implementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    implementation "com.github.Anuken.Arc:arcnet:$mindustryVersion"
-    implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    implementation "com.github.Anuken.Arc:arc-core:$arcVersion"
+    implementation "com.github.Anuken.Arc:arcnet:$arcVersion"
 }
 
 jar {
