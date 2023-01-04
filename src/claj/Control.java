@@ -48,6 +48,11 @@ public class Control {
                     entry.key, entry.value.link));
         });
 
+        handler.register("unban", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {
+            Blacklist.ips.clear();
+            Blacklist.load();
+        });
+
         handler.register("stop", "Stop hosting distributor and exit the application.", args -> {
             Log.info("Shutting down the application.");
             distributor.stop();

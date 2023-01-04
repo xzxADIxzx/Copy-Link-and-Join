@@ -24,7 +24,7 @@ public class Distributor extends Server {
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
     /** Limit for packet count sent within 3 sec that will lead to a blacklist. */
-    public static final int spamLimit = 250;
+    public static final int spamLimit = 400;
 
     public IntMap<Redirector> redirectors = new IntMap<>();
 
