@@ -10,7 +10,7 @@ public class Blacklist {
     public static final String actionsURL = "https://api.github.com/meta";
     public static final Seq<String> ips = new Seq<>();
 
-    public static void load() {
+    public static void refresh() {
         Http.get(actionsURL, result -> {
             var json = Jval.read(result.getResultAsString());
             json.get("actions").asArray().each(element -> {
@@ -28,5 +28,9 @@ public class Blacklist {
 
     public static boolean contains(String ip) {
         return ips.contains(ip);
+    }
+
+    public static void clear() {
+        ips.clear();
     }
 }

@@ -15,6 +15,8 @@ public class Redirector implements NetListener {
     public String link;
     public Connection host, client;
 
+    public long lastSpammed;
+
     public Redirector(String link, Connection host) {
         this.link = link;
         this.host = host;

@@ -10,6 +10,7 @@ import arc.struct.IntMap;
 import arc.struct.IntMap.Entry;
 import arc.util.Log;
 import arc.util.Ratekeeper;
+import arc.util.Time;
 
 import java.io.IOException;
 
@@ -24,8 +25,9 @@ public class Distributor extends Server {
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
     /** Limit for packet count sent within 3 sec that will lead to a blacklist. */
-    public static final int spamLimit = 400;
+    public static final int spamLimit = 200;
 
+    /** Map containing the connection id and its redirector. */
     public IntMap<Redirector> redirectors = new IntMap<>();
 
     public Distributor() {
@@ -34,7 +36,7 @@ public class Distributor extends Server {
     }
 
     public void run(int port) throws IOException {
-        Blacklist.load(); // refresh github's ips
+        Blacklist.refresh(); // refresh github's ips
         Log.info("Distributor hosted on port @.", port);
 
         bind(port, port);
@@ -91,6 +93,17 @@ public class Distributor extends Server {
         public void received(Connection connection, Object object) {
             var rate = (Ratekeeper) connection.getArbitraryData();
             if (!rate.allow(3000L, spamLimit)) {
+                rate.occurences = 0; // reset to prevent double ban
+
+                var redirector = redirectors.get(connection.getID());
+                if (redirector != null && connection == redirector.host && Time.timeSinceMillis(redirector.lastSpammed) >= 60000L) {
+                    // host can spam packets when killing core, but only once per minute
+
+                    redirector.lastSpammed = Time.millis();
+                    Log.warn("Connection @ spammed with packets but not blacklisted due being a host.", connection.getID());
+                    return;
+                }
+
                 String ip = connection.getRemoteAddressTCP().getAddress().getHostAddress();
                 Log.warn("Blacklisting @ as potential DOS attack - packet spam.", ip);
                 Blacklist.add(ip);

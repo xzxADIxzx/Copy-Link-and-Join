@@ -49,8 +49,8 @@ public class Control {
         });
 
         handler.register("unban", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {
-            Blacklist.ips.clear();
-            Blacklist.load();
+            Blacklist.clear();
+            Blacklist.refresh();
         });
 
         handler.register("stop", "Stop hosting distributor and exit the application.", args -> {
