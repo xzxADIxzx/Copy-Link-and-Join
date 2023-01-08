@@ -24,8 +24,8 @@ public class Distributor extends Server {
     /** List of all characters that are allowed in a link. */
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
-    /** Limit for packet count sent within 3 sec that will lead to a blacklist. */
-    public static final int spamLimit = 200;
+    /** Limit for packet count sent within 3 sec that will lead to a disconnect. */
+    public static final int spamLimit = 300;
 
     /** Map containing the connection id and its redirector. */
     public IntMap<Redirector> redirectors = new IntMap<>();
@@ -93,20 +93,19 @@ public class Distributor extends Server {
         public void received(Connection connection, Object object) {
             var rate = (Ratekeeper) connection.getArbitraryData();
             if (!rate.allow(3000L, spamLimit)) {
-                rate.occurences = 0; // reset to prevent double ban
+                rate.occurences = -100; // reset to prevent double kick
 
                 var redirector = redirectors.get(connection.getID());
                 if (redirector != null && connection == redirector.host && Time.timeSinceMillis(redirector.lastSpammed) >= 60000L) {
                     // host can spam packets when killing core, but only once per minute
 
                     redirector.lastSpammed = Time.millis();
-                    Log.warn("Connection @ spammed with packets but not blacklisted due being a host.", connection.getID());
+                    Log.warn("Connection @ spammed with packets but not disconnected due to being a host.", connection.getID());
                     return;
                 }
 
-                String ip = connection.getRemoteAddressTCP().getAddress().getHostAddress();
-                Log.warn("Blacklisting @ as potential DOS attack - packet spam.", ip);
-                Blacklist.add(ip);
+                Log.warn("Connection @ disconnected due to packet spam.", connection.getID());
+                // TODO send chat message
 
                 connection.close(DcReason.closed);
                 return;
