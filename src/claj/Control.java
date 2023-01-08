@@ -48,7 +48,11 @@ public class Control {
                     entry.key, entry.value.link));
         });
 
-        handler.register("unban", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {
+        handler.register("ban", "<IP>", "Adds the IP to blacklist.", args -> {
+            Blacklist.add(args[0]);
+        });
+
+        handler.register("refresh", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {
             Blacklist.clear();
             Blacklist.refresh();
         });
