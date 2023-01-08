@@ -24,6 +24,10 @@ public class Redirector implements NetListener {
         Log.info("Room @ created!", link);
     }
 
+    public void sendMessage(String message) {
+        host.sendTCP(message);
+    }
+
     @Override
     public void disconnected(Connection connection, DcReason reason) {
         host.close(DcReason.closed);

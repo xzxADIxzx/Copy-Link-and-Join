@@ -58,6 +58,8 @@ public class Control {
         });
 
         handler.register("stop", "Stop hosting distributor and exit the application.", args -> {
+            distributor.redirectors.forEach(entry -> entry.value.sendMessage("[scarlet]\u26A0[] The server is shutting down.\nTry to reconnect in a minute."));
+
             Log.info("Shutting down the application.");
             distributor.stop();
         });

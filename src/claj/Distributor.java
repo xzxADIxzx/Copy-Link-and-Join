@@ -105,7 +105,7 @@ public class Distributor extends Server {
                 }
 
                 Log.warn("Connection @ disconnected due to packet spam.", connection.getID());
-                // TODO send chat message
+                if (redirector != null) redirector.sendMessage("[scarlet]\u26A0[] Room " + redirector.link + " closed due to packet spam.");
 
                 connection.close(DcReason.closed);
                 return;
