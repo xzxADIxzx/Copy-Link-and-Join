@@ -38,8 +38,8 @@ public class Control {
     private void registerCommands() {
         handler.register("help", "Display the command list.", args -> {
             Log.info("Commands:");
-            handler.getCommandList().each(command -> Log.info("  &b&lb @&lc&fi@&fr - &lw@",
-                    command.text, command.paramText.isEmpty() ? "" : " " + command.paramText, command.description));
+            handler.getCommandList().each(command -> Log.info("  &b&lb @@&fr - &lw@",
+                    command.text, command.paramText.isEmpty() ? "" : " &lc&fi" + command.paramText, command.description));
         });
 
         handler.register("cons", "Displays all current connections.", args -> {
@@ -48,8 +48,18 @@ public class Control {
                     entry.key, entry.value.link));
         });
 
+        handler.register("limit", "[amount]", "Sets spam packet limit.", args -> {
+            if (args.length == 0)
+                Log.info("Current limit - @ packets per 3 seconds.", distributor.spamLimit);
+            else {
+                distributor.spamLimit = Strings.parseInt(args[0], 300);
+                Log.info("Packet spam limit set to @ packets per 3 seconds.", distributor.spamLimit);
+            }
+        });
+
         handler.register("ban", "<IP>", "Adds the IP to blacklist.", args -> {
             Blacklist.add(args[0]);
+            Log.info("IP @ was blacklisted.", args[0]);
         });
 
         handler.register("refresh", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {

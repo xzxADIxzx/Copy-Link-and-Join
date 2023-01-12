@@ -25,7 +25,7 @@ public class Distributor extends Server {
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
     /** Limit for packet count sent within 3 sec that will lead to a disconnect. */
-    public static final int spamLimit = 300;
+    public int spamLimit = 300;
 
     /** Map containing the connection id and its redirector. */
     public IntMap<Redirector> redirectors = new IntMap<>();
@@ -93,7 +93,7 @@ public class Distributor extends Server {
         public void received(Connection connection, Object object) {
             var rate = (Ratekeeper) connection.getArbitraryData();
             if (!rate.allow(3000L, spamLimit)) {
-                rate.occurences = -100; // reset to prevent double kick
+                rate.occurences = -spamLimit; // reset to prevent double kick
 
                 var redirector = redirectors.get(connection.getID());
                 if (redirector != null && connection == redirector.host && Time.timeSinceMillis(redirector.lastSpammed) >= 60000L) {
