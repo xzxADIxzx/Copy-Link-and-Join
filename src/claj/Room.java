@@ -21,6 +21,8 @@ public class Room {
         this.link = link;
         this.host = host;
 
+        sendMessage("new"); // there must be at least one empty redirector in the room
+
         Log.info("Room @ created!", link);
     }
 

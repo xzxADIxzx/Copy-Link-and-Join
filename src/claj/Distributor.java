@@ -28,6 +28,9 @@ public class Distributor extends Server {
     public int spamLimit = 300;
 
     /** Map containing the connection id and its redirector. */
+    public IntMap<Room> rooms = new IntMap<>();
+
+    /** Map containing the connection id and its redirector. */
     public IntMap<Redirector> redirectors = new IntMap<>();
 
     public Distributor() {
@@ -53,9 +56,9 @@ public class Distributor extends Server {
         return builder.toString();
     }
 
-    public Redirector find(String link) {
-        for (Entry<Redirector> entry : redirectors)
-            if (entry.value.link.equals(link) && entry.value.client == null) return entry.value;
+    public Room find(String link) {
+        for (Entry<Room> entry : rooms)
+            if (entry.value.link.equals(link)) return entry.value;
 
         return null;
     }
@@ -79,13 +82,19 @@ public class Distributor extends Server {
         public void disconnected(Connection connection, DcReason reason) {
             Log.info("Connection @ lost: @.", connection.getID(), reason);
 
+            var room = rooms.get(connection.getID());
+            if (room != null) {
+                room.close(); // disconnects all related redirectors
+                return;
+            }
+
             var redirector = redirectors.get(connection.getID());
             if (redirector == null) return;
 
             redirectors.remove(redirector.host.getID());
             if (redirector.client != null) redirectors.remove(redirector.client.getID());
 
-            // called after deletion to prevent double close message
+            // called after deletion to prevent double close
             redirector.disconnected(connection, reason);
         }
 
@@ -117,17 +126,39 @@ public class Distributor extends Server {
                     link = generateLink();
 
                     connection.sendTCP(link);
-                    redirectors.put(connection.getID(), new Redirector(link, connection));
-                } else {
-                    var redirector = find(link);
-                    if (redirector == null) {
+                    rooms.put(connection.getID(), new Room(link, connection));
+
+                    Log.info("Connection @ created a room @.", connection.getID(), link);
+                } else if (link.startsWith("host")) {
+                    var room = find(link.substring(4));
+                    if (room == null) {
                         connection.close(DcReason.error);
+                        return;
+                    }
+
+                    var redirector = new Redirector(connection);
+                    room.redirectors.add(redirector);
+                    redirectors.put(connection.getID(), redirector);
+
+                    Log.info("Connection @ hosted a redirector in room @.", connection.getID(), room.link);
+                } else if (link.startsWith("join")) {
+                    var room = find(link.substring(4));
+                    if (room == null) {
+                        connection.close(DcReason.error);
+                        return;
+                    }
+
+                    var redirector = room.redirectors.find(r -> r.client == null);
+                    if (redirector == null) {
+                        connection.close(DcReason.error); // no empty redirectors
                         return;
                     }
 
                     redirector.client = connection;
                     redirectors.put(connection.getID(), redirector);
-                    Log.info("Connection @ joined to room @.", connection.getID(), redirector.link);
+                    room.sendMessage("new"); // ask to create a new redirector for the future
+
+                    Log.info("Connection @ joined to room @.", connection.getID(), room.link);
                 }
 
                 return;

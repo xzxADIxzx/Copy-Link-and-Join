@@ -3,37 +3,24 @@ package claj;
 import arc.net.Connection;
 import arc.net.DcReason;
 import arc.net.NetListener;
-import arc.util.Log;
 
 /**
- * Represents a room containing a host and a client, redirects packets from one to the other.
+ * Contains a host and a client, redirects packets from one to the other.
  * 
  * @author xzxADIxzx
  */
 public class Redirector implements NetListener {
 
-    public String link;
     public Connection host, client;
 
-    public long lastSpammed;
-
-    public Redirector(String link, Connection host) {
-        this.link = link;
+    public Redirector(Connection host) {
         this.host = host;
-
-        Log.info("Room @ created!", link);
-    }
-
-    public void sendMessage(String message) {
-        host.sendTCP(message);
     }
 
     @Override
     public void disconnected(Connection connection, DcReason reason) {
         host.close(DcReason.closed);
         if (client != null) client.close(DcReason.closed);
-
-        Log.info("Room @ closed.", link);
     }
 
     @Override
