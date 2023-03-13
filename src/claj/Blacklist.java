@@ -30,6 +30,10 @@ public class Blacklist {
         return ips.contains(ip);
     }
 
+    public static void remove(String ip) {
+        ips.remove(ip);
+    }
+
     public static void clear() {
         ips.clear();
     }

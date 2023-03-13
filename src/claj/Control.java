@@ -59,7 +59,12 @@ public class Control {
 
         handler.register("ban", "<IP>", "Adds the IP to blacklist.", args -> {
             Blacklist.add(args[0]);
-            Log.info("IP @ was blacklisted.", args[0]);
+            Log.info("IP @ has been blacklisted.", args[0]);
+        });
+
+        handler.register("unban", "<IP>", "Removes the IP from blacklist.", args -> {
+            Blacklist.remove(args[0]);
+            Log.info("IP @ has been removed from blacklist.", args[0]);
         });
 
         handler.register("refresh", "Unbans all IPs and refresh GitHub Actions IPs.", args -> {
