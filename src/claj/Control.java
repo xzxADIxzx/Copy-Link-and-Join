@@ -38,14 +38,20 @@ public class Control {
     private void registerCommands() {
         handler.register("help", "Display the command list.", args -> {
             Log.info("Commands:");
-            handler.getCommandList().each(command -> Log.info("  &b&lb @@&fr - &lw@",
+            handler.getCommandList().each(command -> Log.info("  &b&lb@@&fr - @",
                     command.text, command.paramText.isEmpty() ? "" : " &lc&fi" + command.paramText, command.description));
         });
 
-        handler.register("cons", "Displays all current connections.", args -> {
-            Log.info("Connections:");
-            distributor.redirectors.forEach(entry -> Log.info("  &b&lb Connection @&fr - &lwRoom @",
-                    entry.key, entry.value.link));
+        handler.register("list", "Displays all current rooms.", args -> {
+            Log.info("Rooms:");
+            distributor.rooms.forEach(entry -> {
+                Log.info("  &b&lbRoom @&fr", entry.value.link);
+                entry.value.redirectors.each(r -> {
+                    Log.info("    [H] &b&lbConnection @&fr - @", r.host.getID(), r.host.getRemoteAddressTCP().getAddress().getHostAddress());
+                    if (r.client == null) return;
+                    Log.info("    [C] &b&lbConnection @&fr - @", r.client.getID(), r.client.getRemoteAddressTCP().getAddress().getHostAddress());
+                });
+            });
         });
 
         handler.register("limit", "[amount]", "Sets spam packet limit.", args -> {
@@ -73,7 +79,7 @@ public class Control {
         });
 
         handler.register("stop", "Stop hosting distributor and exit the application.", args -> {
-            distributor.redirectors.forEach(entry -> entry.value.sendMessage("[scarlet]\u26A0[] The server is shutting down.\nTry to reconnect in a minute."));
+            distributor.rooms.forEach(entry -> entry.value.sendMessage("[scarlet]\u26A0[] The server is shutting down.\nTry to reconnect in a minute."));
 
             Log.info("Shutting down the application.");
             distributor.stop();
