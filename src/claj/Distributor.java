@@ -10,7 +10,6 @@ import arc.struct.IntMap;
 import arc.struct.IntMap.Entry;
 import arc.util.Log;
 import arc.util.Ratekeeper;
-import arc.util.Time;
 
 import java.io.IOException;
 
@@ -24,8 +23,8 @@ public class Distributor extends Server {
     /** List of all characters that are allowed in a link. */
     public static final char[] symbols = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwYyXxZz".toCharArray();
 
-    /** Limit for packet count sent within 3 sec that will lead to a disconnect. */
-    public int spamLimit = 300;
+    /** Limit for packet count sent within 3 sec that will lead to a disconnect. Note: only for clients. */
+    public int spamLimit = 500;
 
     /** Map containing the connection id and its redirector. */
     public IntMap<Room> rooms = new IntMap<>();
@@ -63,6 +62,13 @@ public class Distributor extends Server {
         return null;
     }
 
+    public Room find(Redirector redirector) {
+        for (Entry<Room> entry : rooms)
+            if (entry.value.redirectors.contains(redirector)) return entry.value;
+
+        return null;
+    }
+
     // endregion
 
     public class Listener implements NetListener {
@@ -96,25 +102,31 @@ public class Distributor extends Server {
 
             // called after deletion to prevent double close
             redirector.disconnected(connection, reason);
+
+            room = find(redirector);
+            if (room != null) room.redirectors.remove(redirector);
         }
 
         @Override
         public void received(Connection connection, Object object) {
             var rate = (Ratekeeper) connection.getArbitraryData();
             if (!rate.allow(3000L, spamLimit)) {
-                rate.occurences = -spamLimit; // reset to prevent double kick
+                rate.occurences = -spamLimit; // reset to prevent message spam
 
                 var redirector = redirectors.get(connection.getID());
-                if (redirector != null && connection == redirector.host && Time.timeSinceMillis(redirector.lastSpammed) >= 60000L) {
-                    // host can spam packets when killing core, but only once per minute
-
-                    redirector.lastSpammed = Time.millis();
+                if (redirector != null && connection == redirector.host) {
                     Log.warn("Connection @ spammed with packets but not disconnected due to being a host.", connection.getID());
-                    return;
+                    return; // host can spam packets when killing core and etc.
                 }
 
                 Log.warn("Connection @ disconnected due to packet spam.", connection.getID());
-                if (redirector != null) redirector.sendMessage("[scarlet]\u26A0[] Room " + redirector.link + " closed due to packet spam.");
+                if (redirector != null) {
+                    var room = find(redirector);
+                    if (room != null) {
+                        room.sendMessage("[scarlet]\u26A0[] Connection closed due to packet spam.");
+                        room.redirectors.remove(redirector);
+                    }
+                }
 
                 connection.close(DcReason.closed);
                 return;
