@@ -4,6 +4,7 @@ import arc.math.Mathf;
 import arc.net.Connection;
 import arc.net.DcReason;
 import arc.net.FrameworkMessage;
+import arc.net.FrameworkMessage.Ping;
 import arc.net.NetListener;
 import arc.net.Server;
 import arc.struct.IntMap;
@@ -132,7 +133,13 @@ public class Distributor extends Server {
                 return;
             }
 
-            if (object instanceof FrameworkMessage) return;
+            if (object instanceof FrameworkMessage) {
+                if (object instanceof Ping ping && !ping.isReply) { // Reply to incoming pings
+                    ping.isReply = true;
+                    connection.sendTCP(ping);
+                }
+                return;
+            }
             if (object instanceof String link) {
                 if (link.equals("new")) {
                     link = generateLink();
