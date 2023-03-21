@@ -23,7 +23,7 @@ public class Room {
 
         sendMessage("new"); // there must be at least one empty redirector in the room
         sendMessage("Hello, it's me, [#0096FF]xzxADIxzx#7729[], the creator of CLaJ."); // some contact info
-        sendMessage("I just wanted to say that if you have any problems, you can always message me on Discord.");
+        sendMessage("I just want to say that if you have any problems, you can always message me on Discord.");
 
         Log.info("Room @ created!", link);
     }
