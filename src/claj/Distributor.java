@@ -91,6 +91,7 @@ public class Distributor extends Server {
             var room = rooms.get(connection.getID());
             if (room != null) {
                 room.close(); // disconnects all related redirectors
+                rooms.remove(connection.getID());
                 return;
             }
 
