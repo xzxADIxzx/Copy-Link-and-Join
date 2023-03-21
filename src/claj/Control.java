@@ -47,9 +47,9 @@ public class Control {
             distributor.rooms.forEach(entry -> {
                 Log.info("  &b&lbRoom @&fr", entry.value.link);
                 entry.value.redirectors.each(r -> {
-                    Log.info("    [H] &b&lbConnection @&fr - @", r.host.getID(), r.host.getRemoteAddressTCP().getAddress().getHostAddress());
+                    Log.info("    [H] &b&lbConnection @&fr - @", r.host.getID(), Main.getIP(r.host));
                     if (r.client == null) return;
-                    Log.info("    [C] &b&lbConnection @&fr - @", r.client.getID(), r.client.getRemoteAddressTCP().getAddress().getHostAddress());
+                    Log.info("    [C] &b&lbConnection @&fr - @", r.client.getID(), Main.getIP(r.client));
                 });
             });
         });

@@ -1,6 +1,7 @@
 package claj;
 
 import arc.net.ArcNet;
+import arc.net.Connection;
 import arc.util.Log;
 
 import java.time.LocalDateTime;
@@ -27,5 +28,9 @@ public class Main {
         } catch (Throwable error) {
             Log.err("Could not to load redirect system", error);
         }
+    }
+
+    public static String getIP(Connection connection) {
+        return connection.getRemoteAddressTCP().getAddress().getHostAddress();
     }
 }

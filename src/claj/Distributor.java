@@ -11,6 +11,8 @@ import arc.struct.IntMap.Entry;
 import arc.util.Log;
 import arc.util.Ratekeeper;
 
+import static claj.Main.*;
+
 import java.io.IOException;
 
 /**
@@ -144,8 +146,8 @@ public class Distributor extends Server {
                     Log.info("Connection @ created a room @.", connection.getID(), link);
                 } else if (link.startsWith("host")) {
                     var room = find(link.substring(4));
-                    if (room == null) {
-                        connection.close(DcReason.error);
+                    if (room == null || !getIP(room.host).equals(getIP(connection))) {
+                        connection.close(DcReason.error); // kick the connection if it tries to host a redirector without permission
                         return;
                     }
 
