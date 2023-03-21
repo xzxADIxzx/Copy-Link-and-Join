@@ -78,7 +78,7 @@ public class Control {
             Blacklist.refresh();
         });
 
-        handler.register("stop", "Stop hosting distributor and exit the application.", args -> {
+        handler.register("exit", "Stop hosting distributor and exit the application.", args -> {
             distributor.rooms.forEach(entry -> entry.value.sendMessage("[scarlet]\u26A0[] The server is shutting down.\nTry to reconnect in a minute."));
 
             Log.info("Shutting down the application.");
